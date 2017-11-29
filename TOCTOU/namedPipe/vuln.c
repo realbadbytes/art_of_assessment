@@ -11,7 +11,7 @@
 int main()
 {
     int infd, outfd; // File descriptors
-    pid_t pid = {0};
+    pid_t pid;
     char prompt[MAX_BUF] = {0}; // input buffer
     char *namedPipe = "mypipe"; // FIFO Pipe
     char pipeCmd[CMD_LEN] = "/bin/ls"; // Command to send to pipe;
@@ -23,8 +23,10 @@ int main()
     if (pid == 0) //Child
     {
         printf("Preparing to write to pipe...\n");
-        infd = open(namedPipe, O_WRONLY); // write only
-        printf("Pipe opened in write mode...\n");
+        if ((infd = open(namedPipe, O_WRONLY)) == -1) // write only
+            printf("Could not open pipe in write mode!?\n");
+        else 
+            printf("Pipe opened in write mode!\n");
         write(infd, pipeCmd, strlen(pipeCmd)+1); // write cmd
         printf("/bin/ls written to pipe! \n");
         close(infd);
@@ -35,30 +37,18 @@ int main()
     {
         char cmd[CMD_LEN];
 
-        sleep(6); // 6 second window to hijack pipe
         printf("Reading CMD from pipe...\n");
         if ((outfd = open(namedPipe, O_RDONLY)) == -1) // read only
         {
-            printf("Could not open pipe\n");
+            printf("Could not open pipe in read mode!?\n");
             exit(1);
         }
-        sleep(2);
 
-        printf("Would you like to list the directory contents? [Y/y]\n");
-        fgets(prompt, MAX_BUF-1, stdin);
-        switch (prompt[0])
-        {
-            case 'Y':
-            case 'y': read(outfd, cmd, CMD_LEN);
-                      close(outfd);
-                      printf("Running: %s", cmd);
-                      remove(namedPipe);
-                      execl(cmd, cmd, NULL);
-                      break;
-            default:  printf("Odd input...\nNow exiting!\n");
-                      remove(namedPipe);
-                      break;
-        }
+        read(outfd, cmd, CMD_LEN);
+        close(outfd);
+        printf("Running: %s\n", cmd);
+        remove(namedPipe);
+        execl(cmd, cmd, NULL);
     }
 
     return 0;

