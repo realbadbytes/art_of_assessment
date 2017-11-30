@@ -7,6 +7,9 @@ statement       i       buf         c
 for (i=0;       0       -           -
 ...
 if(i<length)..  1       buf[1]='B'  B
+
+tracing through this example, buffer out-of-bound write occurs
+when \n appears more than len bytes into sock buffer
 */
 
 int read_line(int sock, char *buf, size_t length)
