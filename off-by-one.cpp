@@ -8,10 +8,12 @@ int get_user(char *user)
 {
     char buf[128];
 
-    // strlen() checks length of buffer disregarding null terminator
+    // strlen() function calculates the length of string, 
+    // EXCLUDING THE TERMINATING NULL BYTE
     // our string user128 is actually 129 bytes long
     // this check passes since there are 128 chars
     // null terminator is then written outside of buf
+
     if (strlen(user) > sizeof(buf))
         exit(0);
 
